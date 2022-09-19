@@ -38,18 +38,28 @@ galleryImgRef.forEach((element) => observer.observe(element));
 // Lightbox generation:
 let lightboxModal = {};
 
-document.addEventListener("keydown", () => {
-  if (basicLightbox.visible()) {
+const eventListEvent = _.throttle((event) => {
+  if (event.key === "Escape") {
     lightboxModal.close();
   }
-});
+}, 500);
 
 galleryHTML.addEventListener("click", (event) => {
   event.preventDefault();
   if (event.target.classList.contains("gallery__image")) {
-    lightboxModal = basicLightbox.create(`
+    lightboxModal = basicLightbox.create(
+      `
     <img src="${event.target.dataset.source}">
-`);
+`,
+      {
+        onShow: () => {
+          document.addEventListener("keydown", eventListEvent);
+        },
+        onClose: () => {
+          document.removeEventListener("keydown", eventListEvent);
+        },
+      }
+    );
     lightboxModal.show();
   }
 });
